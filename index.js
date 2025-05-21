@@ -58,11 +58,25 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/plants/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { userEmail: email };
+      const result = await plantCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/plants", async (req, res) => {
       const plant = req.body;
       const result = await plantCollection.insertOne(plant);
       res.send(result);
     });
+
+    app.delete("/plants/:id",async(req,res)=>{
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id)};
+      const result = await plantCollection.deleteOne(query);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
