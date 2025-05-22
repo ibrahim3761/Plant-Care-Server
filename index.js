@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    //await client.connect();
     const plantCollection = client.db("platnDB").collection("plants");
 
     app.get("/plants", async (req, res) => {
@@ -50,6 +50,14 @@ async function run() {
         res.send(result);
       }
     });
+    app.get("/plants/recent", async (req, res) => {
+      const result = await plantCollection
+        .find()
+        .sort({ _id: -1 }) // Most recent first
+        .limit(6) // Adjust how many you want
+        .toArray();
+      res.send(result);
+    });
 
     app.get("/plants/:id", async (req, res) => {
       const id = req.params.id;
@@ -71,24 +79,28 @@ async function run() {
       res.send(result);
     });
 
-    app.put("/plants/:id", async(req,res)=>{
+    app.put("/plants/:id", async (req, res) => {
       const id = req.params.id;
-      const filter = {_id : new ObjectId(id)};
-      const options = {upsert : true};
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
       const updatedPlant = req.body;
       const updatedDoc = {
-        $set : updatedPlant
+        $set: updatedPlant,
       };
-      const result = await plantCollection.updateOne(filter,updatedDoc,options);
+      const result = await plantCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
       res.send(result);
-    })
+    });
 
-    app.delete("/plants/:id",async(req,res)=>{
+    app.delete("/plants/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id : new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await plantCollection.deleteOne(query);
       res.send(result);
-    })
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
