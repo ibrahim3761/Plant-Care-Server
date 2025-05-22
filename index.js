@@ -53,8 +53,8 @@ async function run() {
     app.get("/plants/recent", async (req, res) => {
       const result = await plantCollection
         .find()
-        .sort({ _id: -1 }) // Most recent first
-        .limit(6) // Adjust how many you want
+        .sort({ _id: -1 }) 
+        .limit(6) 
         .toArray();
       res.send(result);
     });
