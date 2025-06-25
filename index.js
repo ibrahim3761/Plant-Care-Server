@@ -28,33 +28,24 @@ async function run() {
     const plantCollection = client.db("platnDB").collection("plants");
 
     app.get("/plants", async (req, res) => {
-      const sortBy = req.query.sortBy;
+      const { order = "asc", category } = req.query;
 
-      if (sortBy === "nextWatering") {
-        const result = await plantCollection
-          .aggregate([
-            {
-              $addFields: {
-                nextWateringDate: { $toDate: "$nextWatering" },
-              },
-            },
-            {
-              $sort: { nextWateringDate: 1 },
-            },
-          ])
-          .toArray();
-
-        res.send(result);
-      } else {
-        const result = await plantCollection.find().toArray();
-        res.send(result);
+      const query = {};
+      if (category) {
+        query.category = category.toLowerCase(); // Normalize
       }
-    });
-    app.get("/plants/recent", async (req, res) => {
+
+      const sortOption = { name: order === "desc" ? -1 : 1 };
+
       const result = await plantCollection
-        .find()
-        .sort({ _id: -1 }) 
+        .find(query)
+        .sort(sortOption)
         .toArray();
+      res.send(result);
+    });
+
+    app.get("/plants/recent", async (req, res) => {
+      const result = await plantCollection.find().sort({ _id: -1 }).toArray();
       res.send(result);
     });
 
